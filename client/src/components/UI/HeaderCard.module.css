@@ -1,0 +1,10 @@
+.card {
+  background-image: url("../../assets/images/raw-ingredients-making-pasta-spaghetti-tomatoes-garlic-basil-leaves-herbs-spices-italian-food-meal-preparation-yellow-background-cooking-homemade-delicious-cuisine-eating.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  min-height: 450px !important;
+
+  border-radius: 0 !important;
+  border: none !important;
+}
