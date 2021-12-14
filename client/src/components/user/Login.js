@@ -1,130 +1,71 @@
-import { Col, Form, InputGroup, Row, Button } from "react-bootstrap";
+import { Form, Row } from "react-bootstrap";
 import { Formik } from "formik";
-import * as yup from "yup";
-import axios from "axios";
 import { useContext, useState } from "react";
 import { useHistory } from "react-router";
 import Input from "../UI/Input";
 import AuthContext from "../../store/auth-context";
+import SubmitButton from "../UI/SubmitButton";
+import { loginInputs as inputs } from "../../constants";
+import schema from "../../validations/loginSchema";
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const history = useHistory();
 
-  const authCtx = useContext(AuthContext)
-
-
-  const inputs = [
-    { name: "email", size: "4", type: "email" },
-    { name: "password", size: "4", type: "password" },
-  ];
-
-  const schema = yup.object().shape({
-    email: yup.string().email().required(),
-    password: yup.string().required().min(2),
-  });
+  const authCtx = useContext(AuthContext);
 
   const initialValues = {
     email: "",
     password: "",
   };
-
-  const onLogin = async (user) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await axios.post(
-        `${baseUrl}auth/login`,
-        user
-      );
-
-      ///////////////////////////////////////////////
-    //   const expirationTime = new Date(new Date().getTime() + (+data.expiresIn * 1000))
-    //   authCtx.login(response.data.token, expirationTime.toISOString())
-      ///////////////////////////////////////////////
-
-      console.log("data", response.data);
-      // alert("success")
-      history.replace("/");
-    } catch (error) {
-      console.log(error);
-      setError(error);
-    }
-    setIsLoading(false);
-  };
-
   return (
     <>
+      <h2 className="text-center">LOGIN</h2>
       <Formik
         validationSchema={schema}
-        onSubmit={(values) => {
+        onSubmit={async (values) => {
           const user = {
             email: values.email,
             password: values.password,
           };
-          console.log(user);
-          onLogin(user);
+          const errors = await authCtx.login(user);
+          if (errors.length == 0) history.replace("/");
         }}
         initialValues={initialValues}
       >
-        {(
-          Formik
-          //     {
-          //   handleSubmit,
-          //   handleChange,
-          //   handleBlur,
-          //   values,
-          //   touched,
-          //   isValid,
-          //   errors,
-          // }
-        ) => (
+        {(Formik) => (
           <Form noValidate onSubmit={Formik.handleSubmit}>
             <Row className="mb-3">
               {inputs.map((inputDetails, index) => (
-                <Input
-                  key={index}
-                  name={inputDetails.name}
-                  size={inputDetails.size}
-                  type={inputDetails.type || "text"}
-                  Formik={Formik}
-                />
+                <Form.Group key={index}>
+                  <Input
+                    key={index}
+                    name={inputDetails.name}
+                    label={inputDetails.label}
+                    type={inputDetails.type || "text"}
+                    Formik={Formik}
+                    changeHandler={Formik.handleChange}
+                    roundedPill={"rounded-pill"}
+                  />
+                </Form.Group>
               ))}
             </Row>
-
-            {/* <Form.Group as={Col} md="6" controlId="validationFormik03">
-                <Form.Label>City</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="City"
-                  name="city"
-                  value={Formik.values.city}
-                  onChange={Formik.handleChange}
-                  isInvalid={!!Formik.errors.city}
-                />
-  
-                <Form.Control.Feedback type="invalid">
-                  {Formik.errors.city}
-                </Form.Control.Feedback>
-              </Form.Group>
-  
-              <Form.Group className="mb-3">
-                <Form.Check
-                  required
-                  name="terms"
-                  label="Agree to terms and conditions"
-                  onChange={Formik.handleChange}
-                  isInvalid={!!Formik.errors.terms}
-                  feedback={Formik.errors.terms}
-                  feedbackType="invalid"
-                  id="validationFormik0"
-                />
-              </Form.Group> */}
-            <Button type="submit">Submit form</Button>
+            {authCtx.loginError?.length >= 1 &&
+              [...authCtx.loginError].map((e, index) => (
+                <div key={index} className="text-danger">
+                  {e}
+                </div>
+              ))}
+            <SubmitButton
+              isLoading={isLoading}
+              btnBG={"light"}
+              btnText={"warning"}
+            >
+              Login
+            </SubmitButton>
           </Form>
         )}
       </Formik>
@@ -133,4 +74,3 @@ const Login = () => {
 };
 
 export default Login;
-

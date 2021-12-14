@@ -1,0 +1,12 @@
+ol {
+  padding-left: 0px !important;
+}
+ol li {
+  margin-bottom: 30px;
+  counter-increment: my-awesome-counter;
+}
+ol li::before {
+  content: counter(my-awesome-counter) ". ";
+  color: #ffc107;
+  font-weight: bold;
+}

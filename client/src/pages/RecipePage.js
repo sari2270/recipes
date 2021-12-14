@@ -1,58 +1,77 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
 import { Col, Container, Figure, Image, Row } from "react-bootstrap";
 import { useParams } from "react-router";
-import { Link } from "react-router-dom";
 import Ingredients from "../components/recipe/Ingredients";
 import Instructions from "../components/recipe/Instructions";
-
-const baseUrl = process.env.REACT_APP_BASE_URL;
+import Loading from "../components/UI/Loading";
+import RecipesNotFound from "../components/UI/RecipesNotFound";
+import Title from "../components/UI/Title";
+import { AiFillPrinter } from "react-icons/ai";
+import useFetch from "../hooks/useFetch";
+import NotFound from "./NotFound";
 
 const RecipePage = () => {
-  const params = useParams();
+  const { recipeId } = useParams();
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [recipe, setRecipe] = useState(null);
+  const url = `recipes/${recipeId}`;
 
-  const fetchSingleRecipeHandler = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response =await axios.get(`${baseUrl}/recipes/${params.recipeId}`);        
-      setRecipe(response.data);
-      console.log(1111,response);
-    } catch (error) {
-      console.log("errorrrr");
-    }
-    setIsLoading(false);
-
+  const options = {
+    method: "GET",
   };
-  useEffect(() => {
-    fetchSingleRecipeHandler();
-  }, []);
+  const { isLoading, error, data } = useFetch(url, options);
+  const recipe = data;
 
-  console.log(recipe);
-  if (isLoading) {
-    return <h1>Loading</h1>
-  }
+  if (error) return <NotFound />;
+  if (isLoading || !recipe) return <Loading />;
+  if (!isLoading && !error && recipe.length === 0)
+    return <RecipesNotFound single={true} />;
+
   return (
     <>
-      <Image src={recipe.imgUrl} height="400px" width="100%" alt={"alt"} />
+      <Image
+        src={recipe.imgUrl}
+        height="400px"
+        width="100%"
+        alt={"recipeImg"}
+      />
       <Figure.Caption>
         {recipe.title} (photographer: {recipe.photographer})
       </Figure.Caption>
       <Container>
-          <Row>
-              <h2>{recipe.title}</h2>
-              <Link to={recipe.source_url} target="_blank"><h5>{recipe.source_name}</h5></Link>
-              </Row>
+        <Row>
+          <Title>
+            <div>{recipe.title}</div>
+            <a href={recipe.sourceUrl} target="_blank">
+              <h5 className="text-warning">{recipe.sourceName}</h5>
+            </a>
+          </Title>
+        </Row>
+        <Row className="text-center">
+          <Col>
+            <h4>{recipe.description}</h4>
+          </Col>
+        </Row>
+        <Row className="justify-content-between">
+          <Col xs={11} className="text-warning">
+            {recipe.prepTime} | {recipe.views} views |
+            {new Date(recipe.createdAt).toLocaleDateString("en-US")}
+          </Col>
+          <Col xs={1}>
+            <a
+              className="text-warning fs-4"
+              id="print-recipe"
+              data-article="126457"
+              href="javascript:window.print();"
+            >
+              <AiFillPrinter />
+            </a>
+          </Col>
+        </Row>
         <Row>
           <Col xs={12} md={5}>
-            <Ingredients recipe={recipe}/>
+            <Ingredients recipe={recipe} />
           </Col>
           <Col xs={12} md={7}>
-            <Instructions instructions={recipe.instructions}/>
+            <Instructions instructions={recipe.instructions} />
           </Col>
         </Row>
       </Container>

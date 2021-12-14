@@ -1,16 +1,18 @@
 const express = require("express");
-
 const router = express.Router();
 
 const recipeController = require("../controllers/recipe");
-
+const recipeSchema = require("../validations/recipeSchema");
+const verify = require("../middleware/verifyMiddleware");
 const validation = require("../middleware/validationMiddleware");
-const recipeSchema = require("../validations/recipeValidation");
 
-router.post("/add-recipe", validation(recipeSchema), recipeController.createRecipe);
-router.get("/", recipeController.getRecipes);
-router.get("/search", recipeController.getSearchRecipesByTitle);
-router.get("/categories", recipeController.getCategories);
-router.get("/:recipeId", recipeController.getSingleRecipe);
+router
+  .get("/", recipeController.getRecipes)
+  .post("/add-recipe", [verify, validation(recipeSchema)], recipeController.createRecipe)
+  .get("/search", recipeController.getSearchRecipesByTitle)
+  .get("/categories", recipeController.getCategories)
+  .get("/categories/:categoryTitle", recipeController.getRecipesByCategory)
+  .get("/my-recipes", verify, recipeController.getRecipesByUser)
+  .get("/:recipeId", recipeController.getSingleRecipe);
 
 module.exports = router;

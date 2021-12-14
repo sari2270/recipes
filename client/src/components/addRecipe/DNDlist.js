@@ -1,5 +1,4 @@
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-
 import { FaTrashAlt } from "react-icons/fa";
 import { MdFormatLineSpacing } from "react-icons/md";
 
@@ -51,22 +50,24 @@ const DNDlist = ({
                           className="bg-white border-top border-bottom my-auto"
                         >
                           <span variant="secondary">
-                            <MdFormatLineSpacing className="ingredient-icon p-1 mt-1 text-yellow" />
+                            <MdFormatLineSpacing className="text-warning" />
                           </span>
-                          {componentType == "ingredients" ? (
-                            <>
-                              {item.quantity} {item.measuringUnit}{" "}
-                              {item.ingredientName} {item.state}
-                            </>
-                          ) : (
-                            <>{item.instruction}</>
-                          )}
+                          <span className="text-break">
+                            {componentType == "ingredients" ? (
+                              <>
+                                {item.quantity} {item.measuringUnit}{" "}
+                                {item.ingredientName} {item.state}
+                              </>
+                            ) : (
+                              <>{item.instruction}</>
+                            )}
+                          </span>
                           <span
                             variant="secondary"
-                            className="float-left"
+                            className="float-end"
                             onClick={removeListItemHandler.bind(null, item)}
                           >
-                            <FaTrashAlt className="ingredient-icon p-1ingredient-icon p-1 mt-1 text-yellow" />
+                            <FaTrashAlt className="text-warning" />
                           </span>
                         </li>
                       )}

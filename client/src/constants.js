@@ -1,51 +1,59 @@
-import { Redirect } from "react-router-dom";
-
-import Login from "./components/user/Login";
-import Register from "./components/user/Register";
-import Homepage from "./pages/Homepage";
-import AddRecipeForm from "./components/addRecipe/AddRecipeForm";
-import RecipePage from "./pages/RecipePage";
-import SearchResults from "./pages/SearchResults";
-import CategoryPage from "./pages/CategoryPage";
-
-export const routes = [
-  { path: "/", component: <Redirect to="/homepage" /> },
-  { path: "/homepage", component: <Homepage /> },
-  { path: "/register", component: <Register /> },
-  { path: "/login", component: <Login /> },
-  { path: "/edit-profile", component: <div>edit-profile</div> },
-  { path: "/search", component: <SearchResults /> },
-  { path: "/recipes/:recipeId", component: <RecipePage /> },
-  { path: "/recipes/myRecipes", component: <div>myRecipes</div> },
-  { path: "/category/:categoryName", component: <CategoryPage /> },
-  { path: "/add-new-recipe", component: <AddRecipeForm /> },
-  { path: "/edit-recipe/:recipeId", component: <div>edit recipe</div> },
-  { path: "/conversion", component: <div>conversion and Scaling</div> },
-  { path: "*", component: <div>404</div> },
-];
-
 export const navTitles = [
   { title: "All Recipes", path: "homepage" },
   { title: "Add a Recipe", path: "add-new-recipe" },
-  { title: "Conversion and Scaling", path: "conversion" },
   { title: "Register", path: "register" },
   { title: "Login", path: "login" },
 ];
 
+export const userTitles = [
+  { title: "My Recipes", path: "my-recipes" },
+  { title: "Edit Profile", path: "add-new-recipe" },
+];
+
 export const inputs = [
-  { name: "prepTime", size: "4" },
-  { name: "sourceName", size: "4" },
-  { name: "title", size: "4" },
-  { name: "description", size: "4" },
-  { name: "servings", size: "4", type: "number" },
-  { name: "imgUrl", size: "4", type: "url" },
-  { name: "sourceUrl", size: "4", type: "url" },
-  { name: "photographer", size: "4" },
+  {
+    name: "prepTime",
+    label: "Prep Time (words)",
+    size: "12",
+    isRequired: true,
+  },
+  {
+    name: "servings",
+    label: "Servings (number)",
+    size: "12",
+    type: "number",
+    isRequired: true,
+  },
+  { name: "sourceName", label: "Source Name", size: "12", isRequired: true },
+  { name: "title", size: "12", label: "Title", isRequired: true },
+  { name: "description", label: "Description", size: "12", type: "textarea" },
+  {
+    name: "imgUrl",
+    label: "Image Url",
+    size: "12",
+    type: "url",
+    isRequired: true,
+  },
+  { name: "photographer", label: "Photographer", size: "12", isRequired: true },
+  { name: "sourceUrl", label: "Source Url", size: "12", type: "url" },
 ];
 
 export const inputsIngr = [
-  { name: "quantity", size: "2", type: "number" },
-  { name: "measuringUnit", size: "2" },
-  { name: "state", size: "2" },
-  { name: "ingredientName", size: "2" },
+  { name: "quantity", label: "Quantity", size: "3", type: "number" },
+  { name: "measuringUnit", label: "Measuring Unit", size: "3" },
+  { name: "state", label: "State", size: "3" },
+  { name: "ingredientName", label: "Ingredient", size: "3", isRequired: true },
+];
+
+export const registerInputs = [
+  { name: "firstName", label: "First Name" },
+  { name: "lastName", label: "Last Name" },
+  { name: "email", label: "email", type: "email" },
+  { name: "password", label: "Password", type: "password" },
+  { name: "confirmPassword", label: "Confirm Password", type: "password" },
+];
+
+export const loginInputs = [
+  { name: "email", label: "Email", type: "email" },
+  { name: "password", label: "Password", type: "password" },
 ];

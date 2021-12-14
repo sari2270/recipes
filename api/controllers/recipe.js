@@ -2,140 +2,121 @@ const Recipe = require("../models/recipe");
 const Category = require("../models/category");
 const User = require("../models/user");
 
-exports.getRecipes = (req, res, next) => {
-  const currentPage = req.query.page || 1;
-  const perPage = 10;
-  let totalItems;
-  Recipe.find()
-    .countDocuments()
-    .then((count) => {
-      totalItems = count;
-      return Recipe.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage);
-    })
-    .then((recipes) => {
-      res.status(200).json({
-        message: "Fetches recipes successfully",
-        recipes: recipes,
-        totalItems: totalItems,
-      });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
+exports.getRecipes = async (req, res, next) => {
+  try {
+    let { sort } = req.query;
+    const recipes = await Recipe.find().sort({ [sort]: -1 });
+    res.status(200).json({
+      recipes: recipes,
     });
-};
-exports.getCategories = (req, res, next) => {
-  console.log(111111111111111111111);
-  Category.find()
-    .then((categories) => {
-      res.status(200).json({categories});
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
-};
-exports.getSearchRecipesByTitle = (req, res, next) => {
-  Recipe.find({ title: { $regex: req.query.q.trim() } })
-    .countDocuments()
-    .then((count) => {
-      totalItems = count;
-      return Recipe.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage);
-    })
-    .then((recipes) => {
-      res.status(200).json({
-        message: "Fetches recipes successfully",
-        recipes: recipes,
-        totalItems: totalItems,
-      });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
-};
-exports.getSingleRecipe = (req, res, next) => {
-  Recipe.findOneAndUpdate({ _id: req.params.recipeId }, { $inc: { views: 1 } })
-    // Recipe.findById(req.params.recipeId)
-    .then((recipe) => {
-      res.status(200).json(recipe);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
-exports.getUpdateViews = (req, res, next) => {
-  Recipe.findOneAndUpdate({ _id: res._id }, { $inc: { views: 1 } })
-    .then((recipe) => {
-      res.status(200).json(recipe);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  } catch (error) {
+    res.status(500).json(error);
+  }
 };
 
-exports.createRecipe = (req, res, next) => {
-  const {
-    title,
-    user,
-    imgUrl,
-    photographer,
-    ingredients,
-    instructions,
-    prepTime,
-    servings,
-    description,
-    sourceName,
-    sourceUrl,
-    difficulty,
-    categories,
-  } = req.body;
-  let creator;
-  const recipe = new Recipe({
-    title,
-    creator: "61832f8dbe0844faaf3cab41",
-    // creator: req.userId,
-    imgUrl,
-    photographer,
-    ingredients,
-    instructions,
-    prepTime,
-    servings,
-    description,
-    sourceName,
-    sourceUrl,
-    difficulty,
-    categories,
-  });
-  recipe
-    .save()
-    .then((result) => User.findById("61832f8dbe0844faaf3cab41"))
-    // .then((result) => User.findById(req.userId))
-    .then((user) => {
-      creator = user;
-      user.recipes.push(recipe);
-      return user.save();
-    })
-    .then((result) => {
-      res
-        .status(201)
-        .json({
-          message: "Recipe created successfully",
-          recipe: recipe,
-          creator: { _id: creator._id, name: creator.name },
-        });
-    })
-    .catch((err) => {
-      console.log(err);
+exports.getRecipesByCategory = async (req, res, next) => {
+  try {
+    const recipes = await Category.findOne({ title: req.params.categoryTitle })
+      .select("recipes")
+      .populate("recipes");
+    res.status(200).json({ recipes: recipes.recipes });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+exports.getRecipesByUser = async (req, res, next) => {
+  try {
+    const recipes = await User.findOne({ _id: req.body.userId })
+      .select("recipes")
+      .populate("recipes");
+    res.status(200).json({ recipes: recipes.recipes });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+exports.getCategories = async (req, res, next) => {
+  try {
+    const categories = await Category.find();
+    res.status(200).json({ categories });
+  } catch (error) {
+    res.statusCode(500).json(error);
+  }
+};
+
+exports.getSearchRecipesByTitle = async (req, res, next) => {
+  try {
+    const searchQuery = req.query.q.trim();
+    if (searchQuery.length <= 1) {
+      return res.status(403).json("Query must be at least 2 characters");
+    }
+    let { sort } = req.query;
+    const recipes = await Recipe.find({
+      title: { $regex: searchQuery },
+    }).sort({ [sort]: -1 });
+    res.status(200).json({ recipes, total: recipes.length });
+  } catch (error) {
+    res.statusCode(500).json(error);
+  }
+};
+
+exports.getSingleRecipe = async (req, res, next) => {
+  try {
+    const recipe = await Recipe.findOneAndUpdate(
+      { _id: req.params.recipeId },
+      { $inc: { views: 1 } }
+    );
+    res.status(200).json(recipe);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+exports.createRecipe = async (req, res, next) => {
+  try {
+    const {
+      title,
+      userId,
+      imgUrl,
+      photographer,
+      ingredients,
+      instructions,
+      prepTime,
+      servings,
+      description,
+      sourceName,
+      sourceUrl,
+      categories,
+    } = req.body;
+    const recipe = await new Recipe({
+      title,
+      creator: userId,
+      imgUrl,
+      photographer,
+      ingredients,
+      instructions,
+      prepTime,
+      servings,
+      description,
+      sourceName,
+      sourceUrl,
+      categories,
     });
+    await recipe.save();
+    const user = await User.findById(userId);
+    user.recipes.push(recipe);
+    await user.save();
+    for (const currCategory of recipe.categories) {
+      const category = await Category.findOne({ title: currCategory });
+      category.recipes.push(recipe._id);
+      await category.save();
+    }
+    res.status(201).json({
+      recipe: recipe,
+      creator: { _id: user._id, name: user.name },
+    });
+  } catch (error) {
+    res.status(500).json(error);
+  }
 };

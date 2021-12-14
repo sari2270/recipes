@@ -6,13 +6,13 @@ const categorySchema = new Schema({
     type: String,
     required: true,
   },
-  recipes:Array
-  // recipes: [
-  //   {
-  //     type: Schema.Types.ObjectId,
-  //     ref: "Recipe",
-  //   },
-  // ],
+  recipes: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Recipe",
+      required: true,
+    },
+  ],
 });
 
 module.exports = mongoose.model("Category", categorySchema);

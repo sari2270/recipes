@@ -1,216 +1,132 @@
-// import React, { useCallback, useEffect, useState } from "react";
-// import axios from "axios";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import jwt_decode from "jwt-decode";
 
-// const baseUrl = "http://localhost:8080"
-// //request interceptor to add the auth token header to requests
-// axios.interceptors.request.use(
-//   (config) => {
-//     const accessToken = localStorage.getItem("accessToken");
-//     if (accessToken) {
-//       config.headers["x-auth-token"] = accessToken;
-//     }
-//     return config;
-//   },
-//   (error) => {
-//     Promise.reject(error);
-//   }
-// );
-
-// //response interceptor to refresh token on receiving token expired error
-// axios.interceptors.response.use(
-//   (response) => {
-//     return response;
-//   },
-//   function (error) {
-//     const originalRequest = error.config;
-//     let refreshToken = localStorage.getItem("refreshToken");
-
-//     if (
-//       refreshToken &&
-//       error.response.status === 401 &&
-//       !originalRequest._retry
-//     ) {
-//       originalRequest._retry = true;
-//       return axios
-//         .post(`${baseUrl}/auth/refresh_token`, { refreshToken: refreshToken })
-//         .then((res) => {
-//           if (res.status === 200) {
-//             localStorage.setItem("accessToken", res.data.accessToken);
-//             console.log("Access token refreshed!");
-//             return axios(originalRequest);
-//           }
-//         });
-//     }
-//     return Promise.reject(error);
-//   }
-// );
-
-// let logoutTimer;
-// const AuthContext = React.createContext({
-//   display: "hide",
-//   user: null,
-//   token: "",
-//   isLoggedIn: false,
-//   register: (body) => {},
-//   login: (body) => {},
-//   refreshToken: (body) => {},
-//   logout: (body) => {},
-//   getProtected: () => {},
-// });
-
-// const calculateRemainingTime = (expirationTime) => {
-//   const currentTime = new Date().getTime();
-//   const ajdExpirationTime = new Date(expirationTime).getTime();
-//   const remainingDuration = ajdExpirationTime - currentTime;
-//   return remainingDuration;
-// };
-
-// const retrieveStoredToken = () => {
-//   const storedToken = localStorage.getItem("token");
-//   const storedExpirationDate = localStorage.getItem("expirationTime");
-
-//   const remainingTime = calculateRemainingTime(storedExpirationDate);
-
-//   if (remainingTime <= 60000) {
-//     localStorage.removeItem("token");
-//     localStorage.removeItem("expirationTime");
-//     return null;
-//   }
-//   return { token: storedToken, duration: remainingTime };
-// };
-
-// export const AuthContextProvider = ({ children }) => {
-//   const tokenData = retrieveStoredToken();
-//   let initialToken;
-//   if (tokenData) {
-//     initialToken = tokenData.token;
-//   }
-//   const [token, setToken] = useState(initialToken);
-//   const userIsLoggedIn = !!token;
-
-//   const logoutHandler = useCallback(() => {
-//     setToken(null);
-//     localStorage.removeItem("token");
-//     localStorage.removeItem("expirationTime");
-//     if (logoutTimer) {
-//       clearTimeout(logoutTimer);
-//     }
-//   }, []);
-
-//   const loginHandler = (token, expirationTime) => {
-//     setToken(token);
-//     localStorage.setItem("token", token);
-//     localStorage.setItem("expirationTime", expirationTime);
-//     const remainingTime = calculateRemainingTime(expirationTime);
-//     logoutTimer = setTimeout(logoutHandler, remainingTime);
-//   };
-
-//   useEffect(() => {
-//     if (tokenData) {
-//       console.log(tokenData.duration);
-//       logoutTimer = setTimeout(logoutHandler, tokenData.duration);
-//     }
-//   }, [tokenData, logoutHandler]);
-
-//   const contextValue = {
-//     token: token,
-//     isLoggedIn: userIsLoggedIn,
-//     // login: loginHandler,
-//     // logout: logoutHandler,
-//     display: "hide",
-//   user: null,
-//     register: (body) => {
-//       return axios.post(`${baseUrl}/auth/register`, body);
-//     },
-//     login: (body) => {
-//       return axios.post(`${baseUrl}/auth/login`, body);
-//     },
-//     refreshToken: (body) => {
-//       return axios.post(`${baseUrl}/auth/refresh_token`, body);
-//     },
-//     logout: (body) => {
-//       return axios.delete(`${baseUrl}/auth/logout`, body);
-//     },
-//     getProtected: () => {
-//       return axios.get(`${baseUrl}/auth/protected_resource`);
-//     },
-//   };
-//   return (
-//     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
-//   );
-// };
-
-// export default AuthContext;
-
-import React, { useCallback, useEffect, useState } from "react";
-
-let logoutTimer;
 const AuthContext = React.createContext({
-  token: "",
+  user: null,
   isLoggedIn: false,
-  login: (token) => {},
+  register: (user) => {},
+  login: (user) => {},
   logout: () => {},
+  customAxios: () => {},
+  registerError: [],
+  loginError: [],
 });
-
-const calculateRemainingTime = (expirationTime) => {
-  const currentTime = new Date().getTime();
-  const ajdExpirationTime = new Date(expirationTime).getTime();
-  const remainingDuration = ajdExpirationTime - currentTime;
-  return remainingDuration;
-};
-
-const retrieveStoredToken = () => {
-  const storedToken = localStorage.getItem("token");
-  const storedExpirationDate = localStorage.getItem("expirationTime");
-
-  const remainingTime = calculateRemainingTime(storedExpirationDate);
-
-  if (remainingTime <= 60000) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("expirationTime");
-    return null;
-  }
-  return { token: storedToken, duration: remainingTime };
-};
+const baseUrl = process.env.REACT_APP_BASE_URL;
 
 export const AuthContextProvider = ({ children }) => {
-  const tokenData = retrieveStoredToken();
-  let initialToken;
-  if (tokenData) {
-    initialToken = tokenData.token;
-  }
-  const [token, setToken] = useState(initialToken);
-  const userIsLoggedIn = !!token;
+  const [user, setUser] = useState(null);
 
-  const logoutHandler = useCallback(() => {
-    setToken(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("expirationTime");
-    if (logoutTimer) {
-      clearTimeout(logoutTimer);
-    }
-  }, [])
-
-  const loginHandler = (token, expirationTime) => {
-    setToken(token);
-    localStorage.setItem("token", token);
-    localStorage.setItem("expirationTime", expirationTime);
-    const remainingTime = calculateRemainingTime(expirationTime);
-    logoutTimer = setTimeout(logoutHandler, remainingTime);
-  };
+  const [isLoading, setIsLoading] = useState(false);
+  const [registerError, setRegisterError] = useState([]);
+  const [loginError, setLoginError] = useState([]);
 
   useEffect(() => {
-    if (tokenData) {
-      console.log(tokenData.duration);
-      logoutTimer = setTimeout(logoutHandler, tokenData.duration);
+    const localStorageHandler = async () => {
+      const LSuser = JSON.parse(localStorage.getItem("user"));
+      if (LSuser) {
+        setUser(LSuser);
+        await refreshToken();
+      }
+    };
+    localStorageHandler();
+  }, []);
+
+  const refreshToken = async () => {
+    try {
+      const LSuser = JSON.parse(localStorage.getItem("user"));
+      const response = await axios.post(`${baseUrl}auth/refresh`, {
+        token: user?.refreshToken || LSuser.refreshToken,
+      });
+      const updatedUser = {
+        ...(LSuser || user),
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
+      };
+      setUser({ ...updatedUser });
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      return response.data;
+    } catch (err) {
+      console.error(err);
     }
-  }, [tokenData, logoutHandler]);
+  };
+  const customAxios = () => {
+    const axiosJWT = axios.create();
+
+    axiosJWT.interceptors.request.use(
+      async (config) => {
+        let currentDate = new Date();
+        const decodedToken = jwt_decode(user.accessToken);
+
+        if (decodedToken.exp * 1000 < currentDate.getTime()) {
+          const data = await refreshToken();
+          config.headers["authorization"] = "bearer " + data.accessToken;
+        }
+        return config;
+      },
+      (err) => {
+        return Promise.reject(err);
+      }
+    );
+    return axiosJWT;
+  };
+
+  const registerHandler = async (user) => {
+    let errorR = [];
+    setIsLoading(true);
+    setRegisterError([]);
+    try {
+      await axios.put(`${baseUrl}auth/register`, user);
+      loginHandler(user);
+      return errorR;
+    } catch (error) {
+      setRegisterError((prev) => [...prev, error?.response?.data?.errors]);
+      errorR = [error?.response?.data?.errors];
+      setIsLoading(false);
+      return errorR;
+    }
+  };
+  const loginHandler = async (user) => {
+    let errorL = [];
+    setIsLoading(true);
+    setLoginError([]);
+    try {
+      const response = await axios.post(`${baseUrl}auth/login`, user);
+      setUser(response.data);
+      localStorage.setItem("user", JSON.stringify(response.data));
+      setIsLoading(false);
+      return errorL;
+    } catch (error) {
+      setLoginError((prev) => [...prev, error?.response?.data?.errors]);
+      errorL = [error?.response?.data?.errors];
+      setIsLoading(false);
+      return errorL;
+    }
+  };
+
+  const logoutHandler = async () => {
+    try {
+      await customAxios().delete(`${baseUrl}auth/logout`, {
+        data: { refreshToken: user.refreshToken },
+        headers: { authorization: "bearer " + user.accessToken },
+      });
+      setUser(null);
+      localStorage.removeItem("user");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const contextValue = {
-    token: token,
-    isLoggedIn: userIsLoggedIn,
+    user: user,
+    isLoggedIn: !!user?.firstName,
+    registerError: registerError,
+    loginError: loginError,
+    register: registerHandler,
     login: loginHandler,
     logout: logoutHandler,
+    customAxios: customAxios,
   };
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

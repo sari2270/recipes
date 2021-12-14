@@ -1,78 +1,86 @@
 import { Navbar, Container, Nav, NavDropdown } from "react-bootstrap";
 import { Link, NavLink } from "react-router-dom";
 import CustomNavLink from "./CustomNavLink";
-
-import axios from "axios";
-import { useState } from "react";
-
-import { navTitles, UserNavTitles } from "../../constants";
+import { useContext } from "react";
+import Loading from "../../components/UI/Loading";
+import RecipesNotFound from "../../components/UI/RecipesNotFound";
+import useFetch from "../../hooks/useFetch";
+import { navTitles, userTitles } from "../../constants";
+import AuthContext from "../../store/auth-context";
 
 import classes from "./Navigation.module.css";
-import { useEffect } from "react";
-
-const baseUrl = process.env.REACT_APP_BASE_URL;
+import NotFound from "../../pages/NotFound";
 
 const Navigation = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const authCtx = useContext(AuthContext);
 
-  const fetchCategoriesHandler = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(
-        `${baseUrl}recipes/categories`
-      );
-      setCategories(response.data.categories);
-    } catch (error) {
-      console.log("errorrrr");
-    }
+  const url = `recipes/categories`;
+
+  const options = {
+    method: "GET",
   };
-  useEffect(() => {
-    fetchCategoriesHandler();
-  }, []);
+  const { isLoading, error, data } = useFetch(url, options);
+  const categories = data?.categories;
 
-  const dropDownLinks = categories.map(({ title }, index) => (
-    <li key={index}>
-      <Link to={`/category/${title}`} className={classes.reset}>
-        {title}
-      </Link>
-    </li>
+  const dropDownLinks = categories?.map(({ title }, index) => (
+    <Link key={index} to={`/category/${title}`} className={classes.link}>
+      {title}
+    </Link>
   ));
 
   const navLinks = navTitles.map(({ title, path }, index) => (
     <CustomNavLink key={index} title={title} path={path} />
   ));
+
+  if (error) return <NotFound/>;
+  if (isLoading || !categories) return <Loading />;
+  if (!isLoading && categories.length === 0) return <RecipesNotFound />;
+
   return (
     <>
       <Navbar sticky="top" bg="light" expand="lg">
         <Container fluid>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Nav>
+            <NavLink
+              to="/"
+              className={`${(classes.link, classes["app-title"])} text-warning`}
+            >
+              FOODIES
+            </NavLink>
+          </Nav>
           <Navbar.Collapse
             id="basic-navbar-nav"
             className=" justify-content-between"
           >
             <Nav>
-              <NavLink to="/" className={classes.link}>
-                FOODIES
-              </NavLink>
-            </Nav>
-
-            <Nav>
               <NavDropdown
                 title="Categories"
                 id="basic-nav-dropdown"
-                className={classes.reset}
+                className={classes["dropdown-title"]}
               >
-                <ul className={classes.reset}>{dropDownLinks}</ul>
+                <ul>{dropDownLinks}</ul>
               </NavDropdown>
 
               {navLinks.slice(0, -2)}
             </Nav>
-
-            <Nav>{navLinks.slice(-2)}</Nav>
           </Navbar.Collapse>
+
+          {!authCtx.isLoggedIn && <Nav>{navLinks.slice(-2)}</Nav>}
+          {authCtx.isLoggedIn && (
+            <Nav>
+              <span className="mx-2 text-warning">{`Hi ${authCtx.user.firstName},`}</span>
+
+              <Link
+                activeclassname={classes.active}
+                className={classes.link}
+                onClick={authCtx.logout}
+                to={`/`}
+              >
+                {`Logout`}
+              </Link>
+            </Nav>
+          )}
         </Container>
       </Navbar>
     </>

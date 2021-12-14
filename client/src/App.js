@@ -1,21 +1,15 @@
-import { useContext } from "react";
-import { Switch, Route, Link, Redirect } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
+import Navigation from "./components/layout/Navigation";
+import { routes } from "./routes";
+import ProtectedRoute from "./components/layout/ProtectedRoute";
+import AuthPage from "./pages/AuthPage";
+import AddRecipeForm from "./components/addRecipe/AddRecipeForm";
+import ProtectedAuthRoute from "./components/layout/ProtectedAuthRoute";
 
 import "./App.css";
-import Navigation from "./components/layout/Navigation";
-import Login from "./components/user/Login";
-import Register from "./components/user/Register";
-import Homepage from "./pages/Homepage";
-import AddRecipeForm from "./components/addRecipe/AddRecipeForm";
-import RecipePage from "./pages/RecipePage";
-import SearchResults from "./pages/SearchResults";
-import AuthContext from "./store/auth-context";
-import { routes } from "./constants";
 
 function App() {
-  const authCtx = useContext(AuthContext);
-
-  const routesComponents = routes.map(({ path, component }, index) => (
+  const regularRoutes = routes.map(({ path, component }, index) => (
     <Route exact path={path} key={index}>
       {component}
     </Route>
@@ -24,7 +18,16 @@ function App() {
     <>
       <Navigation />
       <main>
-        <Switch>{routesComponents}</Switch>
+        <Switch>
+          <ProtectedRoute
+            component={AddRecipeForm}
+            exact
+            path={"/add-new-recipe"}
+          />
+          <ProtectedAuthRoute component={AuthPage} exact path={"/register"} />
+          <ProtectedAuthRoute component={AuthPage} exact path={"/login"} />
+          {regularRoutes}
+        </Switch>
       </main>
     </>
   );
