@@ -1,7 +1,12 @@
 # recipes
 
 ## About The Project
+
 FOODIES -a recipe web application – great for keeping track of family recipes, mods to ones you find online, or have created yourself!
+
+## Screenshot
+
+![homepage](https://user-images.githubusercontent.com/84671041/146287730-52ded68b-e1f1-4992-8773-65fcb4ef8e78.png)
 
 ## Features
 
@@ -13,9 +18,6 @@ FOODIES -a recipe web application – great for keeping track of family recipes,
 - Add recipe (including Drag & Drop)
 - Ingredients quantity by wanted servings
 - Mark recipe completed instructions
-
-## Screenshot
-![homepage](https://user-images.githubusercontent.com/84671041/146287730-52ded68b-e1f1-4992-8773-65fcb4ef8e78.png)
 
 ## Built With
 
