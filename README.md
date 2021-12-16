@@ -14,8 +14,8 @@ FOODIES -a  recipe website – great for keeping track of family recipes, mods t
 - Ingredients quantity by wanted servings
 - Mark recipe completed instructions
 
-## Screenshots
-![homepage](https://user-images.githubusercontent.com/84671041/146054433-3a16a58d-9b7b-4cd5-b2e2-fa87a1d5321c.png)
+## Screenshot
+![homepage](https://user-images.githubusercontent.com/84671041/146287568-b0676213-8062-40aa-bfa8-babb84c418f8.png)
 
 ## Built With
 
