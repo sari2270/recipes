@@ -2,7 +2,7 @@
 
 ## About The Project
 
-FOODIES -a recipe web application – great for keeping track of family recipes, mods to ones you find online, or have created yourself!
+FOODIES - a recipe web application for browsing different recipes and uploading your own
 
 ## Screenshot
 
@@ -10,14 +10,14 @@ FOODIES -a recipe web application – great for keeping track of family recipes,
 
 ## Features
 
-- Register & Login
+- Registeration & Login
 - JWT authentication
-- Sorting
-- Search recipe
-- Recipes categories
-- Add recipe (including Drag & Drop)
-- Ingredients quantity by wanted servings
-- Mark recipe completed instructions
+- Sorting: by date and views
+- Search functionality for recipes
+- View recipes by categories
+- Add recipes: with drag/drop feature for reordering ingredients and instructions
+- Automatic update of ingredients' quantity when serving size is changed
+- Mark recipe instructions as completed
 
 ## Built With
 
@@ -42,8 +42,15 @@ FOODIES -a recipe web application – great for keeping track of family recipes,
 - Express
 - Mongoose
 - Jwt-decode
-- jsonwebtoken
+- Jsonwebtoken
 
+## Installation Guide
+
+1. Clone this repository to your computer
+2. Install client-side dependencies by navigating into the client directory and running npm install.
+3. Install server-side dependencies by navigating into the api directory and running npm install.
+4. Run the client app by navigating into the client directory and running npm start.
+5. Run the server by navigating into the api directory and running npm start.
 
 ## Author
 
