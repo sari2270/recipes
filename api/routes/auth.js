@@ -1,23 +1,16 @@
-const express = require('express')
+const express = require("express");
+const router = express.Router();
 
-const router = express.Router()
-
-const userController = require('../controllers/auth')
-const authController = require('../controllers/auth')
-
-const middleware = require('../middleware/index')
-
+const authController = require("../controllers/auth");
+const verify = require("../middleware/verifyMiddleware");
 const validation = require("../middleware/validationMiddleware");
-const loginSchema = require("../validations/loginValidation");
-const registerSchema = require("../validations/registerValidation");
+const loginSchema = require("../validations/loginSchema");
+const registerSchema = require("../validations/registerSchema");
 
-router.put('/register', validation(registerSchema), authController.register)
-router.post('/login', validation(loginSchema), authController.login)
-router.post('/refresh-token', validation(loginSchema), authController.generateRefreshToken)
-router.delete('/logout', validation(loginSchema), authController.logout)
-router.get('/protected-resource', middleware.checkAuth, (req,res)=>{
-    return res.status(200).json({user: req.user})
-})
-// router.get('/:recipeId',recipeController.getSingleRecipe)
+router
+  .put("/register", validation(registerSchema), authController.register)
+  .post("/login", validation(loginSchema), authController.login)
+  .delete("/logout", verify, authController.logout)
+  .post("/refresh", authController.refresh);
 
-module.exports = router
+module.exports = router;

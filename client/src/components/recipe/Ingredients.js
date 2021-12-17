@@ -1,34 +1,21 @@
 import { Form, ListGroup, ListGroupItem } from "react-bootstrap";
-import { RiWhatsappFill } from "react-icons/ri";
-import { AiFillPrinter } from "react-icons/ai";
-import {
-  FaMinusCircle,
-  FaPlusCircle,
-  FaPinterest,
-  FaFacebook,
-} from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { FaMinusCircle, FaPlusCircle } from "react-icons/fa";
 import { useState } from "react";
+import { customQuantity } from "../../utils/helper";
 
-const Ingredients = ({recipe}) => {
+const Ingredients = ({ recipe }) => {
+  const [wantedServings, setWantedServings] = useState(recipe.servings);
 
-  const [wantedServings, setWantedServings] = useState(3);
-
-  let ingredients = recipe.ingredients.map(
+  const ingredients = recipe.ingredients.map(
     ({ quantity, measuringUnit, ingredientName, state }, index) => (
       <Form.Check
         type="checkbox"
         key={index}
-        variant="warning"
         label={
           <span>
-            {/* {quantity != 0 && */}
-            {quantity != 0 &&
-              quantity != null &&
-              ((wantedServings / recipe.servings) * quantity)
-                .toFixed(2)
-                .replace(/\.00$/, "")}{" "}
-            {measuringUnit} {state} {ingredientName} 
+            {quantity &&
+              customQuantity(wantedServings, recipe.servings, quantity)}{" "}
+            {measuringUnit} {state} {ingredientName}
           </span>
         }
       />
@@ -51,13 +38,14 @@ const Ingredients = ({recipe}) => {
       <ListGroup variant="flush">
         <ListGroupItem>
           <div className="mb-3">
-            <FaMinusCircle onClick={minusServings}>-</FaMinusCircle>
+            <button className="border-0 rounded-circle btn-light text-warning">
+              <FaMinusCircle onClick={minusServings}>-</FaMinusCircle>
+            </button>
             <span>{wantedServings || recipe.servings}</span>
-            <FaPlusCircle onClick={plusServings}>+</FaPlusCircle>
-            servings |
-            <Link to="/conversion" target="_blank">
-              go to conversion
-            </Link>
+            <button className="border-0 rounded-circle btn-light text-warning">
+              <FaPlusCircle onClick={plusServings}>+</FaPlusCircle>
+            </button>
+            servings
           </div>
           <div>{ingredients}</div>
         </ListGroupItem>

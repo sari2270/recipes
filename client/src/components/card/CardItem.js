@@ -1,11 +1,9 @@
 import React from "react";
 import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { BsEye } from "react-icons/bs";
 
 import classes from "./CardItem.module.css";
-
-import { BsEye, BsFillBookmarkFill } from "react-icons/bs";
-
 
 const CardItem = ({ recipe }) => {
   return (
@@ -21,9 +19,10 @@ const CardItem = ({ recipe }) => {
         </Link>
         <Card.Body className="text-center">
           <Link to={`/recipes/${recipe._id}`}>
-            <Card.Title className={`text-center ${classes.title}`}>{recipe.title}</Card.Title>
+            <Card.Title className={`text-center ${classes.title}`}>
+              {recipe.title}
+            </Card.Title>
           </Link>
-          {/* <Card.Text className="d-flex justify-content-around text-dark a-white"> */}
           <div className="bigger-font">
             <span>
               {recipe.views}
@@ -31,13 +30,11 @@ const CardItem = ({ recipe }) => {
             </span>
           </div>
           <div className="bigger-font">
-            {/* <span>{recipe.date.split("T")[0]}</span> */}
             <span>
               {new Date(recipe.createdAt).toLocaleDateString("en-US")}
             </span>
           </div>
           <div className="bigger-font "></div>
-          {/* </Card.Text> */}
         </Card.Body>
       </Card>
     </>

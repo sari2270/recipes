@@ -1,25 +1,38 @@
-import { Form, InputGroup, Row, Button } from "react-bootstrap";
-import { Formik } from "formik";
-import * as yup from "yup";
+import { Form, InputGroup, Row, Button, Container, Col } from "react-bootstrap";
+import { Field, Formik } from "formik";
 import Input from "../UI/Input";
-import axios from "axios";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Prompt, useHistory } from "react-router";
-
-import { BsFillPlusCircleFill } from "react-icons/bs";
-
+import { FaPlusCircle } from "react-icons/fa";
 import { inputs, inputsIngr } from "../../constants";
 import DNDlist from "./DNDlist";
+import AuthContext from "../../store/auth-context";
+import Title from "../UI/Title";
+import SubmitButton from "../UI/SubmitButton";
+import schema from "../../validations/recipeSchema";
+import useFetch from "../../hooks/useFetch";
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
 
 const AddRecipeForm = () => {
   const history = useHistory();
+  const authCtx = useContext(AuthContext);
+
+  const url = `recipes/categories`;
+
+  const options = {
+    method: "GET",
+  };
+  const { data } = useFetch(url, options);
+  const categories = data?.categories;
 
   const [isFocusedForm, setIsFocusedForm] = useState(false);
 
   const [ingredients, updateIngredients] = useState([]);
   const [instructions, updateInstructions] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState([]);
 
   const [singleIngredient, setSingleIngredient] = useState({
     id: "" + ingredients.length,
@@ -28,6 +41,7 @@ const AddRecipeForm = () => {
     ingredientName: "",
     state: "",
   });
+
   const [singleInstruction, setSingleInstruction] = useState({
     id: "" + instructions.length,
     instruction: "",
@@ -41,50 +55,6 @@ const AddRecipeForm = () => {
     updateFunc(items);
   }
 
-  const insertrecipeDet = (originalArr, setFunc) => {
-    const tempArr = [];
-    for (let i = 0; i < originalArr.length; i++) {
-      tempArr.push({ id: "" + i, ...originalArr[i] });
-    }
-    setFunc([...tempArr]);
-  };
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const schema = yup.object().shape({
-    prepTime: yup
-      .string()
-      .required()
-      .max(20, "too longgggggggg"),
-    servings: yup
-      .number()
-      .required()
-      .min(1, "min 111111111")
-      .max(20, "max 20000000"),
-    title: yup
-      .string()
-      .required()
-      .min(2, "min 22222")
-      .max(40, "max 40000000"),
-    sourceUrl: yup.string().nullable().url(),
-    imgUrl: yup.string().required().url(),
-    photographer: yup
-      .string()
-      .required()
-      .min(2, "min 22222")
-      .max(40, "max 40000000"),
-    sourceName: yup
-      .string()
-      .required()
-      .min(2, "min 22222")
-      .max(30, "max 40000000"),
-    description: yup.string().max(600, "max 40000000"),
-    // categories:'',
-    // difficulty:'',
-    // terms: yup.bool().required().oneOf([true], "Terms must be accepted"),
-  });
-
   const initialValues = {
     prepTime: "",
     servings: "",
@@ -94,23 +64,22 @@ const AddRecipeForm = () => {
     photographer: "",
     sourceName: "",
     description: "",
-    // categories: "",
-    // difficulty: "",
-    terms: false,
+    categories: [],
   };
+
   const IngredientsChangeHandler = ({ target: { name, value } }) => {
     setSingleIngredient((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
+
   const InstructionChangeHandler = ({ target: { value } }) => {
     setSingleInstruction((prev) => ({
       ...prev,
       instruction: value,
     }));
   };
-
   const addIngredientHandler = () => {
     if (singleIngredient.ingredientName.trim() == "") return;
     updateIngredients([...ingredients, singleIngredient]);
@@ -122,6 +91,7 @@ const AddRecipeForm = () => {
       state: "",
     });
   };
+
   const addInstructionHandler = () => {
     if (singleInstruction.instruction.trim() == "") return;
     updateInstructions([...instructions, singleInstruction]);
@@ -132,17 +102,14 @@ const AddRecipeForm = () => {
   };
   const onAddRecipe = async (values) => {
     setIsLoading(true);
-    setError(null);
-
+    setError([]);
     try {
-      const response = await axios.post(
-        `${baseUrl}recipes/add-recipe`,
-        values
-      );
+      await authCtx.customAxios().post(`${baseUrl}recipes/add-recipe`, values, {
+        headers: { authorization: `bearer ${authCtx.user.accessToken}` },
+      });
       history.replace("/");
     } catch (error) {
-      console.log(error);
-      setError(error);
+      setError([...error.response.data.errors]);
     }
     setIsLoading(false);
   };
@@ -152,110 +119,144 @@ const AddRecipeForm = () => {
       <Formik
         validationSchema={schema}
         onSubmit={(values) => {
+          setError([]);
           values.ingredients = ingredients;
           values.instructions = instructions;
-          values.difficulty = "hard";
-          console.log(values)
-          // values.user = { name: "sari" },
+          if (!authCtx.user?.id) {
+            setError((prev) => [...prev, "You are not authenticated"]);
+            return;
+          }
+          values.userId = authCtx.user.id;
           onAddRecipe(values);
         }}
         initialValues={initialValues}
       >
-        {(
-          Formik
-          //     {
-          //   handleSubmit,
-          //   handleChange,
-          //   handleBlur,
-          //   values,
-          //   touched,
-          //   isValid,
-          //   errors,
-          // }
-        ) => (
-          <Form
-            noValidate
-            onSubmit={Formik.handleSubmit}
-            onFocus={() => {
-              setIsFocusedForm(true);
-            }}
-          >
-            <Row className="mb-3">
-              {inputs.map((inputDetails, index) => (
-                <Input
-                  key={index}
-                  name={inputDetails.name}
-                  size={inputDetails.size}
-                  type={inputDetails.type}
-                  Formik={Formik}
-                  changeHandler={Formik.handleChange}
-                />
-              ))}
-            </Row>
-            <Row className="mb-3">
-              <InputGroup>
-                {inputsIngr.map((inputDetails, index) => (
-                  <Input
-                    key={index}
-                    name={inputDetails.name}
-                    size={inputDetails.size}
-                    type={inputDetails.type}
-                    value={singleIngredient[inputDetails.name]}
-                    Formik={Formik}
-                    changeHandler={IngredientsChangeHandler}
-                  />
-                ))}
-                <Button
-                  type="button"
-                  onClick={addIngredientHandler}
-                  variant="warning"
-                >
-                  <BsFillPlusCircleFill />
-                </Button>
-              </InputGroup>
-            </Row>
-
-            <DNDlist
-              componentType="ingredients"
-              Formik={Formik}
-              content={ingredients}
-              saveDNDHandler={saveDNDHandler}
-              updateContent={updateIngredients}
-            />
-            <InputGroup>
-              <Input
-                name="instruction"
-                size="5"
-                value={singleInstruction.instruction}
-                Formik={Formik}
-                changeHandler={InstructionChangeHandler}
-              />
-              <Button
-                type="button"
-                onClick={addInstructionHandler}
-                variant="warning"
-              >
-                <BsFillPlusCircleFill />
-              </Button>
-            </InputGroup>
-            <DNDlist
-              componentType="instructions"
-              Formik={Formik}
-              content={instructions}
-              saveDNDHandler={saveDNDHandler}
-              updateContent={updateInstructions}
-            />
-
-            <Button
-              type="submit"
-              onClick={() => {
-                setIsFocusedForm(false);
+        {(Formik) => (
+          <Container>
+            <Title>Add a Recipe</Title>
+            <Form
+              noValidate
+              onSubmit={Formik.handleSubmit}
+              onFocus={() => {
+                setIsFocusedForm(true);
               }}
-              variant="warning"
             >
-              Add{" "}
-            </Button>
-          </Form>
+              <Row className="mb-3">
+                <Col xs={12} md={5}>
+                  <div>
+                    {inputs
+                      .slice(0, -3)
+                      .map(({ name, label, size, type, isRequired }, index) => (
+                        <Input
+                          key={index}
+                          name={name}
+                          label={label}
+                          size={size}
+                          type={type}
+                          isRequired={isRequired}
+                          Formik={Formik}
+                          changeHandler={Formik.handleChange}
+                        />
+                      ))}
+                  </div>
+                  <div id="checkbox-group" className="mt-4">
+                    Categories
+                  </div>
+                  <div role="group">
+                    {categories &&
+                      categories.map(({ title }, index) => (
+                        <label key={index} className="mx-2">
+                          <Field
+                            type="checkbox"
+                            name="categories"
+                            value={title}
+                          />
+                          {title}
+                        </label>
+                      ))}
+                  </div>
+                </Col>
+                <Col xs={12} md={7}>
+                  {inputs
+                    .slice(-3)
+                    .map(({ name, label, size, type, isRequired }, index) => (
+                      <Input
+                        key={index}
+                        name={name}
+                        label={label}
+                        size={size}
+                        type={type}
+                        isRequired={isRequired}
+                        Formik={Formik}
+                        changeHandler={Formik.handleChange}
+                      />
+                    ))}
+                  <InputGroup>
+                    {inputsIngr.map(
+                      ({ name, label, size, type, isRequired }, index) => (
+                        <Input
+                          key={index}
+                          name={name}
+                          label={label}
+                          size={size}
+                          type={type}
+                          isRequired={isRequired}
+                          value={singleIngredient[name]}
+                          Formik={Formik}
+                          changeHandler={IngredientsChangeHandler}
+                        />
+                      )
+                    )}
+                  </InputGroup>
+                  <Button className="rounded-circle btn-light text-warning p-0 fs-4 my-1">
+                    <FaPlusCircle onClick={addIngredientHandler}>
+                      +
+                    </FaPlusCircle>
+                  </Button>
+                  <DNDlist
+                    componentType="ingredients"
+                    Formik={Formik}
+                    content={ingredients}
+                    saveDNDHandler={saveDNDHandler}
+                    updateContent={updateIngredients}
+                  />
+                  <InputGroup>
+                    <Input
+                      name="instruction"
+                      label="Instruction"
+                      size="12"
+                      value={singleInstruction.instruction}
+                      Formik={Formik}
+                      changeHandler={InstructionChangeHandler}
+                    />
+                    <Button className="rounded-circle btn-light text-warning p-0 fs-4 my-1">
+                      <FaPlusCircle onClick={addInstructionHandler}>
+                        +
+                      </FaPlusCircle>
+                    </Button>
+                  </InputGroup>
+                  <DNDlist
+                    componentType="instructions"
+                    Formik={Formik}
+                    content={instructions}
+                    saveDNDHandler={saveDNDHandler}
+                    updateContent={updateInstructions}
+                  />
+                </Col>
+              </Row>
+              {error?.length >= 1 &&
+                error.map((e) => <div className="text-danger">{e}</div>)}
+
+              <SubmitButton
+                isLoading={isLoading}
+                onClick={() => {
+                  setIsFocusedForm(false);
+                }}
+              >
+                Add The Recipe
+              </SubmitButton>
+            </Form>
+          </Container>
         )}
       </Formik>
     </>

@@ -7,7 +7,7 @@ const CustomNavLink = ({ title, path }) => {
     <>
       <NavLink
         to={`/${path}`}
-        activeClassName={classes.active}
+        activeclassname={classes.active}
         className={classes.link}
       >
         {title}

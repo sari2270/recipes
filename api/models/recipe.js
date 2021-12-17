@@ -27,23 +27,7 @@ const recipeSchema = new Schema(
       type: String,
       required: true,
     },
-    difficulty: {
-      type: String,
-      enum: ["easy", "medium", "hard"],
-      required: true,
-    },
-    // categories: {
-    //   categories: [
-    //     {
-    //       categoryId: {
-    //         type: Schema.Types.ObjectId,
-    //         ref: "Category",
-    //         required: true,
-    //       },
-    //     },
-    //   ],
-    //   // enum: ['easy', 'medium', 'hard'],
-    // },
+    categories: [String],
     prepTime: {
       type: String,
       required: true,
@@ -60,10 +44,6 @@ const recipeSchema = new Schema(
         ingredientName: { type: String, required: true },
       },
     ],
-    // instructions: {
-    //   type: [String],
-    //   required: true,
-    // },
     instructions: [{ id: String, instruction: String }],
     creator: {
       type: Schema.Types.ObjectId,

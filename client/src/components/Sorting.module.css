@@ -1,0 +1,7 @@
+.sort-type {
+  cursor: pointer;
+}
+.sort-type:hover,
+.active {
+  text-decoration: underline;
+}
