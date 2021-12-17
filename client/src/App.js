@@ -6,8 +6,6 @@ import AuthPage from "./pages/AuthPage";
 import AddRecipeForm from "./components/addRecipe/AddRecipeForm";
 import ProtectedAuthRoute from "./components/layout/ProtectedAuthRoute";
 
-import "./App.css";
-
 function App() {
   const regularRoutes = routes.map(({ path, component }, index) => (
     <Route exact path={path} key={index}>
