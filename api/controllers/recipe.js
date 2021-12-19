@@ -4,7 +4,7 @@ const User = require("../models/user");
 
 exports.getRecipes = async (req, res, next) => {
   try {
-    let { sort } = req.query;
+    const { sort } = req.query;
     const recipes = await Recipe.find().sort({ [sort]: -1 });
     res.status(200).json({
       recipes: recipes,
@@ -51,7 +51,7 @@ exports.getSearchRecipesByTitle = async (req, res, next) => {
     if (searchQuery.length <= 1) {
       return res.status(403).json("Query must be at least 2 characters");
     }
-    let { sort } = req.query;
+    const { sort } = req.query;
     const recipes = await Recipe.find({
       title: { $regex: searchQuery },
     }).sort({ [sort]: -1 });

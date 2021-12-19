@@ -4,15 +4,13 @@ import classes from "./Navigation.module.css";
 
 const CustomNavLink = ({ title, path }) => {
   return (
-    <>
-      <NavLink
-        to={`/${path}`}
-        activeclassname={classes.active}
-        className={classes.link}
-      >
-        {title}
-      </NavLink>
-    </>
+    <NavLink
+      to={`/${path}`}
+      activeClassName={classes.active}
+      className={classes.link}
+    >
+      {title}
+    </NavLink>
   );
 };
 

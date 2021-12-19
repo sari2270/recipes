@@ -32,58 +32,56 @@ const Navigation = () => {
     <CustomNavLink key={index} title={title} path={path} />
   ));
 
-  if (error) return <NotFound/>;
+  if (error) return <NotFound />;
   if (isLoading || !categories) return <Loading />;
   if (!isLoading && categories.length === 0) return <RecipesNotFound />;
 
   return (
-    <>
-      <Navbar sticky="top" bg="light" expand="lg">
-        <Container fluid>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Nav>
-            <NavLink
-              to="/"
-              className={`${(classes.link, classes["app-title"])} text-warning`}
-            >
-              FOODIES
-            </NavLink>
-          </Nav>
-          <Navbar.Collapse
-            id="basic-navbar-nav"
-            className=" justify-content-between"
+    <Navbar sticky="top" bg="light" expand="lg">
+      <Container fluid>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Nav>
+          <NavLink
+            to="/"
+            className={`${(classes.link, classes["app-title"])} text-warning`}
           >
-            <Nav>
-              <NavDropdown
-                title="Categories"
-                id="basic-nav-dropdown"
-                className={classes["dropdown-title"]}
-              >
-                <ul>{dropDownLinks}</ul>
-              </NavDropdown>
+            FOODIES
+          </NavLink>
+        </Nav>
+        <Navbar.Collapse
+          id="basic-navbar-nav"
+          className=" justify-content-around"
+        >
+          <Nav>
+            <NavDropdown
+              title="Categories"
+              id="basic-nav-dropdown"
+              className={classes["dropdown-title"]}
+            >
+              <ul>{dropDownLinks}</ul>
+            </NavDropdown>
 
-              {navLinks.slice(0, -2)}
-            </Nav>
-          </Navbar.Collapse>
+            {navLinks.slice(0, -2)}
+          </Nav>
+        </Navbar.Collapse>
 
-          {!authCtx.isLoggedIn && <Nav>{navLinks.slice(-2)}</Nav>}
-          {authCtx.isLoggedIn && (
-            <Nav>
-              <span className="mx-2 text-warning">{`Hi ${authCtx.user.firstName},`}</span>
+        {!authCtx.isLoggedIn && <Nav>{navLinks.slice(-2)}</Nav>}
+        {authCtx.isLoggedIn && (
+          <Nav>
+            <span className="mx-2 text-warning">{`Hi ${authCtx.user.firstName},`}</span>
 
-              <Link
-                activeclassname={classes.active}
-                className={classes.link}
-                onClick={authCtx.logout}
-                to={`/`}
-              >
-                {`Logout`}
-              </Link>
-            </Nav>
-          )}
-        </Container>
-      </Navbar>
-    </>
+            <Link
+              activeclassname={classes.active}
+              className={classes.link}
+              onClick={authCtx.logout}
+              to={`/`}
+            >
+              {`Logout`}
+            </Link>
+          </Nav>
+        )}
+      </Container>
+    </Navbar>
   );
 };
 

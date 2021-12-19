@@ -1,11 +1,13 @@
+.text-color {
+  color: rgb(104, 101, 101) !important;
+}
+
 .img {
   height: 400px;
 }
 
 .title {
   text-decoration: none !important;
-  color: rgb(104, 101, 101) !important;
-  height: 60px;
 }
 
 a:hover,

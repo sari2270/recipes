@@ -20,26 +20,24 @@ const Sorting = ({ sortType, setSortType }) => {
   };
 
   return (
-    <>
-      <div>
-        Sort by:
-        <ul className="order list-inline-item">
-          <li
-            className={viewsClasses}
-            onClick={changeSortHandler.bind(null, "views")}
-          >
-            Views
-          </li>
-          <span>| </span>
-          <li
-            className={dateClasses}
-            onClick={changeSortHandler.bind(null, "createdAt")}
-          >
-            Date
-          </li>
-        </ul>
-      </div>
-    </>
+    <div>
+      Sort by:
+      <ul className="order list-inline-item">
+        <li
+          className={viewsClasses}
+          onClick={()=>changeSortHandler("views")}
+        >
+          Views
+        </li>
+        <span>| </span>
+        <li
+          className={dateClasses}
+          onClick={()=>changeSortHandler("createdAt")}
+        >
+          Date
+        </li>
+      </ul>
+    </div>
   );
 };
 

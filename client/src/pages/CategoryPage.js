@@ -27,18 +27,12 @@ const CategoryPage = () => {
   if (!isLoading && recipes.length === 0) return <RecipesNotFound />;
 
   return (
-    <>
-      <Container>
-        <Row>
-          <Title>{categoryName}</Title>
-        </Row>
-        <Cards
-          recipes={recipes}
-          sortType={sortType}
-          setSortType={setSortType}
-        />
-      </Container>
-    </>
+    <Container>
+      <Row>
+        <Title>{categoryName}</Title>
+      </Row>
+      <Cards recipes={recipes} sortType={sortType} setSortType={setSortType} />
+    </Container>
   );
 };
 
